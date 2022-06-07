@@ -2,6 +2,7 @@ variable "tenancy_ocid" {
 }
 
 variable "user_ocid" {
+  string = "ocid1.user.oc1..aaaaaaaaj5xd5m6uwrkgwppiepx2scnmxm5uvjfojss5msemrdfngbszcqva"
 }
 
 variable "fingerprint" {
