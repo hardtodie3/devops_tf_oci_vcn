@@ -29,9 +29,9 @@ jobs:
           touch ~/.oci/config
           echo "[DEFAULT]" >> ~/.oci/config
           echo "user=${{secrets.OCI_USER_ID}}" >> ~/.oci/config
-          echo "fingerprint=${{secrets.}}" >> ~/.oci/config
-          echo "tenancy=${{secrets.}}" >> ~/.oci/config
-          echo "region=${{secrets.}}" >> ~/.oci/config
+          echo "fingerprint=${{secrets.OCI_FINGERPRINT}}" >> ~/.oci/config
+          echo "tenancy=${{secrets.OCI_TENANCY_ID}}" >> ~/.oci/config
+          echo "region=${{secrets.OCI_REGION}}" >> ~/.oci/config
           echo "oci_username=${{secrets.OCI_USERNAME}}" >> ~/.oci/config
           echo "oci_user_authtoken=${{secrets.OCI_USER_AUTHTOKEN}}" >> ~/.oci/config
           echo "key_file=~/.oci/oci_api_key.pem" >> ~/.oci/config
