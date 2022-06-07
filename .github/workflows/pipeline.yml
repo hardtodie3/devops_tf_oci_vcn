@@ -1,0 +1,69 @@
+# Nome do Workflow
+name: OCI Terraform Pipeline
+
+# Evento que irá acionar a pipeline (actions)
+on: 
+  push:
+    branches:
+      - main
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Write OCI Config File
+        run: |
+          mkdir ~/.oci
+          touch ~/.oci/config
+          echo "[DEFAULT]" >> ~/.oci/config
+          echo "oci_username=${{secrets.OCI_USERNAME}}" >> ~/.oci/config
+          echo "oci_user_authtoken=${{secrets.OCI_USER_AUTHTOKEN}}" >> ~/.oci/config
+          echo "key_file=~/.oci/oci_api_key.pem" >> ~/.oci/config
+          echo "To create the API signing key"
+          openssl genrsa -out ~/.oci/oci_api_key.pem 2048
+          chmod go-rwx ~/.oci/oci_api_key.pem
+          echo "To generate the public key for the given private key"
+          openssl rsa -pubout -in ~/.oci/oci_api_key.pem -out ~/.oci/oci_api_key_public.pem
+          pwd
+          ls -ltr
+          ls -ltr ~/.oci
+
+      - name: Define TF Global Variables
+        run: |
+          echo "export TF_VAR_user_ocid=${{secrets.OCI_USER_ID}}" >> ~/.bash_profile
+          echo "export TF_VAR_fingerprint=${{secrets.OCI_FINGERPRINT}}" >> ~/.bash_profile
+          echo "export TF_VAR_region=${{secrets.OCI_REGION}}" >> ~/.bash_profile
+          echo "export TF_VAR_tenancy_ocid=${{secrets.OCI_TENANCY_ID}}" >> ~/.bash_profile
+          echo "export TF_VAR_compartment_ocid=${{secrets.OCI_COMPARTMENT_ID}}" >> ~/.bash_profile
+          echo "export TF_VAR_private_key_path=~/.oci/oci_api_key.pem" >> ~/.bash_profile
+          echo "export TF_VAR_oci_username=${{secrets.OCI_USERNAME}}" >> ~/.bash_profile
+          echo "export TF_VAR_oci_user_authtoken=\"${{secrets.OCI_USER_AUTHTOKEN}}\"" >> ~/.bash_profile
+          echo "export TF_LOG=DEBUG" >> ~/.bash_profile
+          . ~/.bash_profile
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -out config.tfplan
+
+      - name: Terraform Apply
+        id: apply
+        run: terraform apply config.tfplan -auto-approve
