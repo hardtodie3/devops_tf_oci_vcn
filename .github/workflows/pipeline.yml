@@ -20,6 +20,9 @@ jobs:
       TF_VAR_region: ${{secrets.OCI_REGION}}
 
     steps:
+      - uses: actions/checkout@v2
+      - uses: hashicorp/setup-terraform@v1
+
       - name: Write OCI Config File
         run: |
           mkdir ~/.oci
@@ -38,12 +41,6 @@ jobs:
           echo "To generate the public key for the given private key"
           openssl rsa -pubout -in ~/.oci/oci_api_key.pem -out ~/.oci/oci_api_key_public.pem
           ls -ltr ~/.oci
-
-      - name: Checkout
-      - uses: actions/checkout@v2
-
-      - name: Setup Terraform
-      - uses: hashicorp/setup-terraform@v1
 
       - name: Terraform Init
         id: init
